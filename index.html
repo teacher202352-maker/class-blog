@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>도전! 파워블로거</title>
+<style>
+:root{--g:#03c75a;--g2:#02b350;--tx:#222;--sub:#767678;--bd:#e4e8eb;--bg:#f5f6f7;--err:#e5383b}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font-family:"NanumBarunGothic","Nanum Gothic","Noto Sans KR","Malgun Gothic",sans-serif;font-size:16px;line-height:1.7}
+.top{background:#fff;border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:5}
+.top div{max-width:760px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:10px}
+.logo{width:32px;height:32px;border-radius:8px;background:var(--g);color:#fff;font-weight:800;display:grid;place-items:center;font-size:19px}
+.top b{font-size:1.15rem}.top span{color:var(--sub);font-size:.85rem;margin-left:auto}
+.wrap{max-width:760px;margin:16px auto;padding:0 12px}
+.paper{background:#fff;border:1px solid var(--bd);border-radius:6px;padding:28px 24px}
+.who{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.av{width:60px;height:60px;border-radius:50%;background:var(--g);color:#fff;display:grid;place-items:center;font-weight:800;font-size:1.4rem;flex:none;overflow:hidden;cursor:pointer;border:2px solid var(--bd)}
+.av img{width:100%;height:100%;display:block}
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:center;z-index:20;padding:12px;overflow:auto}
+.dlg{background:#fff;border-radius:10px;padding:18px;width:100%;max-width:360px;text-align:center}
+.dlg h3{margin:0 0 4px}.dlg canvas{width:100%;max-width:280px;aspect-ratio:1;border-radius:50%;border:3px solid var(--g);touch-action:none;cursor:crosshair;margin:8px 0;background:#fff}
+.pal{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:6px 0}
+.pal i{width:30px;height:30px;border-radius:50%;border:2px solid #ccc;cursor:pointer}.pal i.on{outline:3px solid var(--g);outline-offset:2px}
+.dlg .row{justify-content:center;gap:6px}.dlg button{padding:8px 12px;font-size:.9rem}.dlg button.on{background:var(--g);color:#fff;border-color:var(--g)}
+.who input{border:0;border-bottom:2px solid var(--bd);font:inherit;font-weight:700;padding:6px 2px;width:220px;max-width:100%;outline:0;background:transparent}
+.who input:focus,.ttl:focus{border-color:var(--g)}
+.ttl{width:100%;border:0;border-bottom:2px solid var(--bd);font:inherit;font-size:1.6rem;font-weight:800;padding:12px 2px;outline:0;margin-top:10px;background:transparent}
+.hint{color:var(--sub);font-size:.88rem;margin:4px 0 0}
+.err{color:var(--err);font-weight:700;font-size:.92rem;min-height:1.3em}
+.tool{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0 8px;padding:10px 0;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd)}
+.tool label{cursor:pointer;border:1px solid var(--bd);border-radius:6px;padding:7px 14px;font-weight:700;font-size:.95rem;background:#fff}
+.tool label:hover{border-color:var(--g);color:var(--g)}
+#pic{display:none}
+.thumbs{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 10px}
+.th{position:relative}.th img{width:100px;height:100px;object-fit:cover;border-radius:6px;border:1px solid var(--bd)}
+.th b{position:absolute;top:-8px;right:-8px;background:#444;color:#fff;border-radius:50%;width:24px;height:24px;text-align:center;line-height:24px;cursor:pointer}
+textarea{width:100%;min-height:260px;border:0;font:inherit;font-size:1.02rem;line-height:1.9;outline:0;resize:vertical;padding:6px 2px}
+.bar{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:12px;padding-top:14px;border-top:1px solid var(--bd)}
+.cnt{color:var(--sub);font-size:.85rem;margin-right:auto}
+button{font:inherit;font-weight:800;border:0;border-radius:6px;padding:11px 24px;background:var(--g);color:#fff;cursor:pointer}
+button:hover{background:var(--g2)}
+button.sec{background:#fff;color:var(--tx);border:1px solid var(--bd)}button.sec:hover{background:#f7f8f9}
+button:disabled{opacity:.55;cursor:not-allowed}
+.res img{width:100%;border:1px solid var(--bd);border-radius:4px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.msg{padding:10px 14px;border-radius:6px;margin-top:12px;font-weight:700}
+.ok{background:#e6f9ee;color:#0a6b35}.bad{background:#fdecec;color:#a02024}
+h2.done{margin:0 0 14px;font-size:1.3rem}
+</style>
+</head>
+<body>
+<div class="top"><div><span class="logo">B</span><b>도전! 파워블로거</b><span>5학년 2학기 국어(나) 매체 단원 - 실천하기</span></div></div>
+<div class="wrap" id="app"></div>
+<script>
+const $=s=>document.querySelector(s),app=$('#app');
+const el=h=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild};
+const FONT='"NanumBarunGothic","Nanum Gothic","Noto Sans KR","Noto Sans CJK KR","Malgun Gothic",sans-serif';
+let avatarCv=null,files=[],draft={nick:'',ttl:'',txt:''},busy=false;
+
+function showWrite(){
+  app.innerHTML=`<div class="paper">
+    <div class="who"><div class="av" id="av" role="button" tabindex="0" title="프로필 꾸미기">?</div>
+      <div><input type="text" id="nick" maxlength="20" placeholder="내 아이디 쓰기"><div class="hint">블로그 방문자들에게 보이는 이름이에요. 내 블로그의 특징을 잘 나타내는 이름을 적어주세요!</div><button class="sec" id="draw" style="padding:5px 12px;font-size:.85rem;margin-top:6px">🎨 프로필 꾸미기</button></div></div>
+    <div class="err" id="e1"></div>
+    <input class="ttl" type="text" id="ttl" maxlength="50" placeholder="제목을 입력하세요">
+    <div class="hint">내 글을 한 줄로 소개해 보세요. 예: 00시에서 즐길 수 있는 가을 축제를 소개합니다</div><div class="err" id="e2"></div>
+    <div class="tool"><label for="pic">📷 사진 넣기</label><input type="file" id="pic" accept="image/*" multiple>
+      <span class="hint" style="margin:0">사진은 최대 3장까지 넣을 수 있어요.</span></div>
+    <div class="thumbs" id="thumbs"></div><div class="err" id="e3"></div>
+    <textarea id="txt" maxlength="3000" placeholder="내가 소개하고 싶은 정보를 적어주세요. 엔터를 누르면 줄이 바뀌고, 문단도 나눌 수 있어요."></textarea>
+    <div class="err" id="e4"></div>
+    <div class="bar"><span class="cnt" id="cnt">0 / 3000자</span><button id="make">발행하기</button></div>
+  </div>`;
+  $('#nick').value=draft.nick;$('#ttl').value=draft.ttl;$('#txt').value=draft.txt;drawThumbs();upd();
+  $('#nick').oninput=upd;$('#txt').oninput=upd;$('#pic').onchange=onPics;$('#make').onclick=make;$('#av').onclick=$('#draw').onclick=openDraw;
+}
+function setAv(){const a=$('#av');if(!a)return;if(avatarCv){if(!a.firstElementChild||a.firstElementChild.tagName!=='IMG'||a.dataset.v!==String(avatarCv.v)){a.innerHTML='';const i=new Image();i.alt='프로필';i.src=avatarCv.toDataURL();a.append(i);a.dataset.v=avatarCv.v}}else{a.dataset.v='';a.textContent=($('#nick').value.trim()[0]||'?')}}
+function upd(){setAv();$('#cnt').textContent=$('#txt').value.length+' / 3000자'}
+function openDraw(){
+  const COL=['#222222','#e5383b','#ff9f1c','#ffd60a','#03c75a','#2d9cdb','#7b61ff','#ff6fb5','#8b5a2b','#ffffff'];
+  let col=COL[0],size=10,erase=false,down=false,last=null;
+  const m=el(`<div class="mask"><div class="dlg"><h3>🎨 내 프로필 그림</h3><p class="hint" style="margin:0">손가락이나 마우스로 그려 보세요. 동그랗게 보여요!</p>
+    <canvas width="300" height="300"></canvas><div class="pal"></div>
+    <div class="row"><button class="sec" data-s="5">가늘게</button><button class="sec on" data-s="10">보통</button><button class="sec" data-s="22">굵게</button><button class="sec" id="er">🧽 지우개</button></div>
+    <div class="row" style="margin-top:6px"><button class="sec" id="bg">🪣 배경 칠하기</button><button class="sec" id="cl">🗑️ 모두 지우기</button></div>
+    <div class="row" style="margin-top:12px"><button class="sec" id="cn">취소</button><button id="ok">완료</button></div></div></div>`);
+  const cv=m.querySelector('canvas'),g=cv.getContext('2d');
+  g.fillStyle='#fff';g.fillRect(0,0,300,300);if(avatarCv)g.drawImage(avatarCv,0,0,300,300);
+  g.lineCap=g.lineJoin='round';
+  const pal=m.querySelector('.pal');
+  COL.forEach((c,i)=>{const d=document.createElement('i');d.style.background=c;if(!i)d.className='on';d.onclick=()=>{col=c;erase=false;m.querySelector('#er').classList.remove('on');pal.querySelectorAll('i').forEach(x=>x.className='');d.className='on'};pal.append(d)});
+  m.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{size=+b.dataset.s;m.querySelectorAll('[data-s]').forEach(x=>x.classList.remove('on'));b.classList.add('on')});
+  m.querySelector('#er').onclick=e=>{erase=!erase;e.target.classList.toggle('on',erase)};
+  m.querySelector('#bg').onclick=()=>{g.fillStyle=col;g.fillRect(0,0,300,300)};
+  m.querySelector('#cl').onclick=()=>{g.fillStyle='#fff';g.fillRect(0,0,300,300)};
+  const pt=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*300/r.width,(e.clientY-r.top)*300/r.height]};
+  const line=(a,b)=>{g.strokeStyle=erase?'#fff':col;g.lineWidth=size;g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1]);g.stroke()};
+  cv.onpointerdown=e=>{down=true;cv.setPointerCapture(e.pointerId);last=pt(e);line(last,[last[0]+.01,last[1]])};
+  cv.onpointermove=e=>{if(!down)return;const p=pt(e);line(last,p);last=p};
+  cv.onpointerup=cv.onpointercancel=()=>{down=false};
+  m.querySelector('#cn').onclick=()=>m.remove();
+  m.querySelector('#ok').onclick=()=>{const c=document.createElement('canvas');c.width=c.height=300;c.getContext('2d').drawImage(cv,0,0);c.v=Date.now();avatarCv=c;setAv();m.remove()};
+  document.body.append(m);
+}
+async function onPics(e){
+  $('#e3').textContent='';
+  for(const f of e.target.files){
+    if(files.length>=3){$('#e3').textContent='사진은 최대 3장까지 올릴 수 있어요.';break}
+    if(!f.type.startsWith('image/')){$('#e3').textContent='사진 파일만 올릴 수 있어요.';continue}
+    try{const bmp=await createImageBitmap(f);files.push({bmp,url:URL.createObjectURL(f)})}catch(x){$('#e3').textContent='이 사진은 열 수 없어요. 다른 사진을 골라 주세요.'}
+  }
+  e.target.value='';drawThumbs();
+}
+function drawThumbs(){
+  const t=$('#thumbs');t.innerHTML='';
+  files.forEach((f,i)=>{const d=el(`<div class="th"><img alt=""><b title="지우기">×</b></div>`);d.querySelector('img').src=f.url;
+    d.querySelector('b').onclick=()=>{files.splice(i,1);drawThumbs()};t.append(d)});
+}
+function save(){draft={nick:$('#nick').value.trim(),ttl:$('#ttl').value.trim(),txt:$('#txt').value}}
+function validate(){
+  const v=(k,e,m)=>{const bad=!draft[k];$(e).textContent=bad?m:'';return !bad};
+  const a=v('nick','#e1','별명을 적어 주세요!'),b=v('ttl','#e2','제목을 적어 주세요!'),c=v('txt','#e4','글 내용을 적어 주세요!');
+  if(!(a&&b&&c)){const f=document.querySelector('.err:not(:empty)');f&&f.scrollIntoView({block:'center'})}
+  return a&&b&&c;
+}
+function wrap(ctx,text,maxW){
+  const out=[];
+  for(const para of text.split('\n')){
+    if(!para.trim()){out.push('');continue}
+    let line='';
+    for(const ch of para){
+      if(ctx.measureText(line+ch).width>maxW&&line){out.push(line);line=ch.trim()?ch:''}else line+=ch;
+    }
+    out.push(line);
+  }
+  return out;
+}
+function dateStr(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}. ${p(d.getHours())}:${p(d.getMinutes())}`}
+function render(){
+  const W=1080,P=80,IW=W-P*2,c=document.createElement('canvas'),x=c.getContext('2d');
+  x.font=`800 54px ${FONT}`;const tl=wrap(x,draft.ttl,IW);
+  x.font=`32px ${FONT}`;const bl=wrap(x,draft.txt,IW);
+  const imgs=files.map(f=>({f,h:Math.min(Math.round(IW*f.bmp.height/f.bmp.width),900)}));
+  const H=190+tl.length*74+30+90+40+imgs.reduce((s,i)=>s+i.h+36,0)+bl.length*58+50+70+50;
+  c.width=W;c.height=H;
+  x.fillStyle='#fff';x.fillRect(0,0,W,H);
+  x.fillStyle='#03c75a';x.fillRect(0,0,W,12);
+  x.textBaseline='middle';
+  x.fillStyle='#03c75a';x.beginPath();x.roundRect(P,50,56,56,14);x.fill();
+  x.fillStyle='#fff';x.font=`800 36px ${FONT}`;x.textAlign='center';x.fillText('B',P+28,79);x.textAlign='left';
+  x.fillStyle='#222';x.font=`800 34px ${FONT}`;x.fillText('도전! 파워블로거',P+74,79);
+  x.fillStyle='#e4e8eb';x.fillRect(P,140,IW,2);
+  let y=190;x.textBaseline='top';
+  x.fillStyle='#222';x.font=`800 54px ${FONT}`;tl.forEach(l=>{x.fillText(l,P,y);y+=74});y+=30;
+  x.fillStyle='#03c75a';x.beginPath();x.arc(P+30,y+30,30,0,Math.PI*2);x.fill();
+  x.textBaseline='middle';
+  if(avatarCv){x.save();x.beginPath();x.arc(P+30,y+30,30,0,Math.PI*2);x.clip();x.drawImage(avatarCv,P,y,60,60);x.restore();x.strokeStyle='#e4e8eb';x.lineWidth=2;x.beginPath();x.arc(P+30,y+30,30,0,Math.PI*2);x.stroke()}
+  else{x.fillStyle='#fff';x.font=`800 30px ${FONT}`;x.textAlign='center';x.fillText(draft.nick[0],P+30,y+31)}
+  x.textAlign='left';x.fillStyle='#222';x.font=`800 30px ${FONT}`;x.fillText(draft.nick,P+78,y+14);
+  x.fillStyle='#767678';x.font=`26px ${FONT}`;x.fillText(dateStr(),P+78,y+50);
+  y+=90;x.fillStyle='#e4e8eb';x.fillRect(P,y+14,IW,2);y+=40;x.textBaseline='top';
+  imgs.forEach(({f,h})=>{
+    const r=Math.min(IW/f.bmp.width,h/f.bmp.height),w=f.bmp.width*r,hh=f.bmp.height*r;
+    x.drawImage(f.bmp,P+(IW-w)/2,y,w,hh);y+=h+36;
+  });
+  x.fillStyle='#222';x.font=`32px ${FONT}`;bl.forEach(l=>{x.fillText(l,P,y);y+=58});
+  y+=30;x.fillStyle='#e4e8eb';x.fillRect(P,y,IW,2);
+  x.fillStyle='#767678';x.font=`28px ${FONT}`;x.textBaseline='middle';x.fillText('♡ 공감',P,y+46);
+  return new Promise(r=>c.toBlob(r,'image/png'));
+}
+async function make(){
+  if(busy)return;save();if(!validate())return;
+  busy=true;$('#make').disabled=true;$('#make').textContent='만드는 중...';
+  try{
+    if(document.fonts)await document.fonts.load(`32px ${FONT}`,'가');
+    const blob=await render();showResult(blob,URL.createObjectURL(blob));
+  }catch(e){$('#make').disabled=false;$('#make').textContent='발행하기';alert('그림을 만들지 못했어요. 글이 너무 길면 줄여서 다시 해 보세요.')}
+  busy=false;
+}
+function showResult(blob,url){
+  const name=(draft.ttl.replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,30)||'블로그')+'.png';
+  app.innerHTML=`<div class="paper res"><h2 class="done">🎉 글이 완성됐어요!</h2><img alt="완성된 블로그 글">
+    <div class="row"><button id="sv">💾 이미지로 저장</button><button class="sec" id="back">✏️ 고치기</button><button class="sec" id="neu">새 글 쓰기</button></div>
+    <div id="st"></div><p class="hint" style="margin-top:12px">저장이 안 되면 그림을 오른쪽 클릭(또는 길게 누르기)해서 '이미지를 다른 이름으로 저장'을 눌러요.</p></div>`;
+  $('.res img').src=url;$('#back').onclick=showWrite;
+  $('#neu').onclick=()=>{draft={nick:draft.nick,ttl:'',txt:''};files=[];showWrite()};
+  $('#sv').onclick=()=>{
+    try{const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();
+      $('#st').innerHTML='<div class="msg ok">✅ 저장했어요! 다운로드 폴더를 확인해 보세요.</div>'}
+    catch(e){$('#st').innerHTML='<div class="msg bad">자동 저장이 안 돼요. 아래 방법으로 그림을 직접 저장해 주세요.</div>'}
+  };
+  scrollTo(0,0);
+}
+showWrite();
+</script>
+</body>
+</html>
